@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const { processBreachProtocolImage } = require('./BreachProtocolOCRupdatedAgain');
-const { solveBreachProtocol } = require('./BreachProtocol');
+const {processBreachProtocolImage} = require('./BreachProtocolOCRupdatedAgain');
+const {solveBreachProtocol} = require('./BreachProtocol');
 
 // Process command line arguments
 const args = process.argv.slice(2);
@@ -59,6 +59,9 @@ async function processAndSolve() {
             console.log(`Using manually specified buffer size: ${manualBufferSize}`);
         }
 
+
+        console.log("-- Code Matrix JSON version (before Cleanup) ---");
+        console.log(JSON.stringify(result.codeMatrix));
         // Clean up the matrix (remove incomplete rows, etc.)
         result.codeMatrix = cleanMatrix(result.codeMatrix);
 
@@ -71,6 +74,7 @@ async function processAndSolve() {
         console.log('\n=== Extracted Data ===');
         console.log('Code Matrix:');
         result.codeMatrix.forEach(row => console.log(row.join(' ')));
+
 
         console.log('\nRequired Sequences:');
         result.requiredSequences.forEach((seq, index) => {
