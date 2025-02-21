@@ -1,7 +1,7 @@
 // Cyberpunk 2077 Breach Protocol OCR Module with Jimp compatibility fixes
 const fs = require('fs');
 const path = require('path');
-const { createWorker } = require('tesseract.js');
+const {createWorker} = require('tesseract.js');
 // Import Jimp correctly
 const Jimp = require('jimp');
 
@@ -73,7 +73,7 @@ class BreachProtocolOCR {
             await processedImage.clone().writeAsync(path.join(debugDir, 'processed_full_image.png'));
 
             // Extract the code matrix through direct OCR of different regions
-            const { codeMatrix, requiredSequences, bufferSize } = await this.extractDataFromImage(processedImage);
+            const {codeMatrix, requiredSequences, bufferSize} = await this.extractDataFromImage(processedImage);
 
             return {
                 codeMatrix,
@@ -130,10 +130,29 @@ class BreachProtocolOCR {
 
         // Extract matrix region (left side of the screen)
         // Fixed coordinates to avoid Jimp/Zod issues
-        const matrixX = Math.round(width * 0.15);
-        const matrixY = Math.round(height * 0.25);
-        const matrixWidth = Math.round(width * 0.35);
-        const matrixHeight = Math.round(height * 0.45);
+
+        // -- We want to extract from 180x (from left) and 340y (from top)
+        // -- Across and down to 860x (from left) and 800y (from top)
+        // Thus 1920 x 1080 image can be worked out exactly
+
+        let matrixX = 180;
+        let matrixY = 340;
+        let matrixWidth = 680; // 860- 180
+        let matrixHeight = 460; // 800 - 340
+        if (width === 1920 && height === 1080) {
+            console.log("Using the exact 1920 x 1080 dimensions");
+            // const matrixX = 180;
+            // const matrixY = 340;
+            // const matrixWidth = 680; // 860- 180
+            // const matrixHeight = 460; // 800 - 340
+        } else {
+            // -- Approximate location
+            console.log("Using the approximate % dimensions");
+            matrixX = Math.round(width * 0.09375); //  180 ÷ 1920
+            matrixY = Math.round(height * 0.3148); //  340 ÷ 1080
+            matrixWidth = Math.round(width * 0.447916); // 860 ÷ 1920
+            matrixHeight = Math.round(height * 0.7407);  // 800 ÷ 1080
+        }
 
         console.log(`Matrix region: x=${matrixX}, y=${matrixY}, width=${matrixWidth}, height=${matrixHeight}`);
 
@@ -148,10 +167,24 @@ class BreachProtocolOCR {
         }
 
         // Extract sequences region (right side of the screen)
-        const seqX = Math.round(width * 0.6);
-        const seqY = Math.round(height * 0.25);
-        const seqWidth = Math.round(width * 0.35);
-        const seqHeight = Math.round(height * 0.45);
+        // -- In 1920x1080 the top left point is: 900x by 340y down and across to 1250x 545y
+        let seqX = 900;
+        let seqY = 340;
+        let seqWidth = 350; // 1250 - 900
+        let seqHeight = 205; // 545 - 340
+
+        if (width === 1920 && height === 1080) {
+            console.log("Using the exact 1920 x 1080 dimensions for the sequence dimensions");
+        } else {
+            // Extract sequences region (right side of the screen) -- These are wrong
+            console.log("Using estimated dimensions for the sequence dimensions");
+            seqX = Math.round(width * 0.6);
+            seqY = Math.round(height * 0.25);
+            seqWidth = Math.round(width * 0.35);
+            seqHeight = Math.round(height * 0.45);
+
+        }
+
 
         console.log(`Sequences region: x=${seqX}, y=${seqY}, width=${seqWidth}, height=${seqHeight}`);
 
@@ -382,8 +415,8 @@ class BreachProtocolOCR {
         }
 
         // Default buffer size if not detected
-        console.log('Using default buffer size: 7');
-        return 7;
+        console.log('Using default buffer size: 8');
+        return 8;
     }
 
     /**
@@ -423,7 +456,8 @@ async function processBreachProtocolImage(imagePath) {
     } catch (error) {
         console.error('Error processing image:', error);
         if (ocr) {
-            await ocr.terminate().catch(() => {}); // Ensure we terminate even on errors
+            await ocr.terminate().catch(() => {
+            }); // Ensure we terminate even on errors
         }
         throw error;
     }
