@@ -2,7 +2,7 @@ To use the Cyberpunk 2077 Breach Protocol Solver CLI with OCR functionality, you
 
 1. **Install the required dependencies** first:
    ```
-   npm install tesseract.js@^4.0.0 jimp express body-parser multer
+   npm install jimp@0.16.3 tesseract.js@4.0.2 express body-parser multer
    ```
    
 // Used to be "npm install tesseract.js jimp express body-parser multer" but Claude wants the v4 version of Tesseract

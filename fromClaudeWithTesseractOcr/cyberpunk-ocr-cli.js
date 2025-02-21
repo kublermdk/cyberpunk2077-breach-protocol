@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const { processBreachProtocolImage } = require('./BreachProtocolOCRupdated');
+const { processBreachProtocolImage } = require('./BreachProtocolOCRupdatedAgain');
 const { solveBreachProtocol } = require('./BreachProtocol');
 
 // Process command line arguments
